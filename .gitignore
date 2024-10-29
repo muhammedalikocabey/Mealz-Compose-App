@@ -1,0 +1,65 @@
+# Android Studio ile ilgili dosyalar
+.gradle/
+.local/
+.idea/
+.DS_Store
+/build/
+*/build/
+.cxx/
+captures/
+
+# IntelliJ IDEA ile ilgili dosyalar
+.idea/workspace.xml
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/.name
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/assetWizardSettings.xml
+.idea/misc.xml
+*.iml
+*.hprof
+.idea/codeStyles/
+.idea/inspectionProfiles/
+.idea/gradle.xml
+
+# MacOS dosyaları
+*.DS_Store
+
+# Gradle ile ilgili dosyalar
+.gradle/
+build/
+**/build/
+gradle-app.setting
+
+# Kotlin ile ilgili dosyalar
+*.kotlin_module
+*.class
+build/
+
+# Log dosyaları
+*.log
+
+# Android ile ilgili dosyalar
+**/lint/reports/
+**/lint/tmp/
+**/lint/intermediates/
+**/lint/generated/
+**/lint/outputs/
+
+# Android Studio profili
+.idea/codestyles/
+.idea/dictionaries/
+.idea/studioProfiling
+captures/
+.externalNativeBuild/
+
+# Proje ile ilgili dosyalar
+local.properties
+/.idea/workspace.xml
+/.idea/libraries
+
+# Android NDK
+.externalNativeBuild/
+.cxx/
