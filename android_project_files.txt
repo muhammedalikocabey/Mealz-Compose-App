@@ -1,0 +1,607 @@
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/proguard-rules.pro
+----------------------------------------
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/androidTest/java/com/makocabey/mealzapp/ExampleInstrumentedTest.kt
+package com.makocabey.mealzapp
+----------------------------------------
+package com.makocabey.mealzapp
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import org.junit.Assert.*
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+@RunWith(AndroidJUnit4::class)
+class ExampleInstrumentedTest {
+    @Test
+    fun useAppContext() {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("com.makocabey.mealzapp", appContext.packageName)
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/test/java/com/makocabey/mealzapp/ExampleUnitTest.kt
+package com.makocabey.mealzapp
+----------------------------------------
+package com.makocabey.mealzapp
+
+import org.junit.Test
+
+import org.junit.Assert.*
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/AndroidManifest.xml
+----------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MealzApp"
+        tools:targetApi="31">
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MealzApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/MainActivity.kt
+package com.makocabey.mealzapp.ui
+----------------------------------------
+package com.makocabey.mealzapp.ui
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.makocabey.mealzapp.ui.details.MealDetailScreen
+import com.makocabey.mealzapp.ui.details.MealDetailsViewModel
+import com.makocabey.mealzapp.ui.meals.MealsCategoriesScreen
+import com.makocabey.mealzapp.ui.meals.MealsCategoriesViewModel
+import com.makocabey.mealzapp.ui.theme.MealzAppTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MealzAppTheme {
+                FoodiezApp()
+            }
+        }
+    }
+}
+
+@Composable
+private fun FoodiezApp() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "destionation_meals_list") {
+        composable(route = "destionation_meals_list") {
+            MealsCategoriesScreen() { navigationMealId ->
+                navController.navigate("destination_meal_details/$navigationMealId")
+            }
+        }
+
+        composable(
+            route = "destination_meal_details/{meal_category_id}",
+            arguments = listOf(navArgument("meal_category_id") {
+                type = NavType.StringType
+            })
+        ) {
+            val viewModel = viewModel<MealDetailsViewModel>()
+            MealDetailScreen(viewModel.mealState.value)
+        }
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/details/MealDetailScreen.kt
+package com.makocabey.mealzapp.ui.details
+----------------------------------------
+package com.makocabey.mealzapp.ui.details
+
+import androidx.compose.foundation.Image
+import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import com.makocabey.model.response.MealResponse
+
+@Composable
+fun MealDetailScreen(meal: MealResponse?) {
+    Column {
+        Row {
+            Card {
+                Image(
+                    painter = rememberImagePainter(data = meal?.imageUrl),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(meal?.name ?: "default name")
+            }
+            Button(onClick = { /*TODO*/ } ) {
+                Text("Change state of meal profile picture")
+            }
+        }
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/details/MealDetailsViewModel.kt
+package com.makocabey.mealzapp.ui.details
+----------------------------------------
+package com.makocabey.mealzapp.ui.details
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import com.makocabey.model.MealsRepository
+import com.makocabey.model.response.MealResponse
+
+class MealDetailsViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: MealsRepository = MealsRepository()
+) : ViewModel() {
+
+    var mealState = mutableStateOf<MealResponse?>(null)
+
+    init {
+        val mealId = savedStateHandle.get<String>("meal_category_id")
+        mealState.value = repository.getMealById(mealId)
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/theme/Color.kt
+package com.makocabey.mealzapp.ui.theme
+----------------------------------------
+package com.makocabey.mealzapp.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Purple80 = Color(0xFFD0BCFF)
+val PurpleGrey80 = Color(0xFFCCC2DC)
+val Pink80 = Color(0xFFEFB8C8)
+
+val Purple40 = Color(0xFF6650a4)
+val PurpleGrey40 = Color(0xFF625b71)
+val Pink40 = Color(0xFF7D5260)
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/theme/Theme.kt
+package com.makocabey.mealzapp.ui.theme
+----------------------------------------
+package com.makocabey.mealzapp.ui.theme
+
+import android.app.Activity
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+
+private val DarkColorScheme = darkColorScheme(
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80
+)
+
+private val LightColorScheme = lightColorScheme(
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    tertiary = Pink40
+
+    /* Other default colors to override
+    background = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE),
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color(0xFF1C1B1F),
+    onSurface = Color(0xFF1C1B1F),
+    */
+)
+
+@Composable
+fun MealzAppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/theme/Type.kt
+package com.makocabey.mealzapp.ui.theme
+----------------------------------------
+package com.makocabey.mealzapp.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+// Set of Material typography styles to start with
+val Typography = Typography(
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    )
+    /* Other default text styles to override
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.5.sp
+    )
+    */
+)
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/meals/MealsCategoriesViewModel.kt
+package com.makocabey.mealzapp.ui.meals
+----------------------------------------
+package com.makocabey.mealzapp.ui.meals
+
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.makocabey.model.MealsRepository
+import com.makocabey.model.response.MealResponse
+import kotlinx.coroutines.launch
+
+class MealsCategoriesViewModel(private val repository: MealsRepository = MealsRepository()
+) : ViewModel() {
+
+
+    init {
+        viewModelScope.launch {
+            val meals = getMeals()
+            mealState.value = meals
+        }
+    }
+
+    val mealState: MutableState<List<MealResponse>> = mutableStateOf(emptyList())
+
+    private suspend fun getMeals(): List<MealResponse> {
+        return repository.getMeals().categories
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/mealzapp/ui/meals/MealsCategoriesScreen.kt
+package com.makocabey.mealzapp.ui.meals
+----------------------------------------
+package com.makocabey.mealzapp.ui.meals
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.wear.compose.material.ContentAlpha
+import coil.compose.rememberImagePainter
+import com.makocabey.mealzapp.ui.theme.MealzAppTheme
+import com.makocabey.model.response.MealResponse
+
+@Composable
+fun MealsCategoriesScreen(navigationCallback: (String) -> Unit) {
+    val viewModel = viewModel<MealsCategoriesViewModel>()
+
+    val meals = viewModel.mealState.value
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(meals) { meal ->
+            MealCategory(meal, navigationCallback)
+        }
+    }
+}
+
+
+@Composable
+fun MealCategory(meal: MealResponse, navigationCallback: (String) -> Unit) {
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+            .clickable {
+                navigationCallback(meal.id)
+            }
+    ) {
+        Row(
+            modifier = Modifier.animateContentSize()
+        ) {
+            Image(
+                painter = rememberImagePainter(meal.imageUrl),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(88.dp)
+                    .padding(4.dp)
+                    .align(Alignment.CenterVertically)
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxWidth(0.8f)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = meal.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Text(
+                    text = meal.description,
+                    textAlign = TextAlign.Start,
+                    style = MaterialTheme.typography.bodySmall,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = if  (isExpanded) 10 else 4,
+                    modifier = Modifier.alpha(ContentAlpha.medium)
+                )
+            }
+
+            Icon(
+                imageVector = if(isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = "Expand",
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(
+                        if(isExpanded)
+                            Alignment.Bottom
+                        else
+                            Alignment.CenterVertically
+                    )
+                    .clickable{ isExpanded = !isExpanded }
+            )
+        }
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    MealzAppTheme {
+        MealsCategoriesScreen( {} )
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/model/MealsRepository.kt
+package com.makocabey.model
+----------------------------------------
+package com.makocabey.model
+
+import com.makocabey.model.api.MealsWebService
+import com.makocabey.model.response.MealResponse
+import com.makocabey.model.response.MealsCategoriesResponse
+
+class MealsRepository(
+    private val webService: MealsWebService = MealsWebService()
+) {
+
+    private var cachedMeals = listOf<MealResponse>()
+
+    suspend fun getMeals() : MealsCategoriesResponse {
+        val response = webService.getMeals()
+        cachedMeals = response.categories
+        return response
+    }
+
+    fun getMealById(id: String?) : MealResponse? {
+        return cachedMeals.firstOrNull() {
+            it.id == id
+        }
+    }
+}
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/model/response/Responses.kt
+package com.makocabey.model.response
+----------------------------------------
+package com.makocabey.model.response
+
+import com.google.gson.annotations.SerializedName
+
+data class MealsCategoriesResponse(
+    val categories: List<MealResponse>
+)
+
+data class MealResponse(
+    @SerializedName("idCategory")
+    val id: String,
+
+    @SerializedName("strCategory")
+    val name: String,
+
+    @SerializedName("strCategoryDescription")
+    val description: String,
+
+    @SerializedName("strCategoryThumb")
+    val imageUrl: String
+)
+========================================
+
+File Path: /Users/makocabey/AndroidStudioProjects/MealzApp/app/src/main/java/com/makocabey/model/api/MealsApi.kt
+package com.makocabey.model.api
+----------------------------------------
+package com.makocabey.model.api
+
+import com.makocabey.model.response.MealsCategoriesResponse
+import kotlinx.coroutines.flow.Flow
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+
+class MealsWebService {
+    private var api: MealsApi
+
+    companion object {
+        private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
+    }
+
+    init {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        api = retrofit.create(MealsApi::class.java)
+    }
+
+    suspend fun getMeals(): MealsCategoriesResponse {
+        return api.getMeals()
+    }
+
+    interface MealsApi {
+        @GET("categories.php")
+        suspend fun getMeals(): MealsCategoriesResponse
+    }
+}
+========================================
+
